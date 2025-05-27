@@ -1,4 +1,4 @@
-package pe.edu.upc.josequispe7.jlqhsecurities;
+package pe.edu.upc.tf_finanzas2025.securities;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;

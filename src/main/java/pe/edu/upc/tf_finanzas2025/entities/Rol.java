@@ -1,4 +1,4 @@
-package pe.edu.upc.josequispe7.jlqhentities;
+package pe.edu.upc.tf_finanzas2025.entities;
 
 
 import jakarta.persistence.*;

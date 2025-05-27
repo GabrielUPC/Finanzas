@@ -1,4 +1,4 @@
-package pe.edu.upc.josequispe7.jlqhrepositories;
+package pe.edu.upc.tf_finanzas2025.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

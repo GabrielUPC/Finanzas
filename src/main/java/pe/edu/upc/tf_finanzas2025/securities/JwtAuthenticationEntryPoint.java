@@ -1,4 +1,4 @@
-package pe.edu.upc.josequispe7.jlqhsecurities;
+package pe.edu.upc.tf_finanzas2025.securities;
 
 
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package pe.edu.upc.josequispe7.jlqhserviceimplements;
+package pe.edu.upc.tf_finanzas2025.serviceimplements;
 
 
 import org.springframework.beans.factory.annotation.Autowired;

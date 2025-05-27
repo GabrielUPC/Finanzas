@@ -1,4 +1,4 @@
-package pe.edu.upc.josequispe7.jlqhcontrollers;
+package pe.edu.upc.tf_finanzas2025.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
