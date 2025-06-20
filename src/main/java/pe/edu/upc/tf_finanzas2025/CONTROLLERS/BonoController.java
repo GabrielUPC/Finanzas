@@ -26,12 +26,13 @@ public class BonoController {
     @Autowired
     private IUsuarioRepository usuarioRepository;
 
+    private final ModelMapper modelMapper = new ModelMapper(); // Único mapeador
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public List<BonoDTO> listar() {
         return Bi.list().stream().map(x -> {
-            ModelMapper m = new ModelMapper();
-            BonoDTO dto = m.map(x, BonoDTO.class);
+            BonoDTO dto = modelMapper.map(x, BonoDTO.class);
             if (x.getU() != null) {
                 dto.setIdUsuario(x.getU().getId());
             }
@@ -42,26 +43,20 @@ public class BonoController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public void add(@RequestBody BonoDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Bono bono = m.map(dto, Bono.class);
-
+        Bono bono = modelMapper.map(dto, Bono.class);
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
-
         Bi.add(bono);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping
     public void modificar(@RequestBody BonoDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Bono bono = m.map(dto, Bono.class);
-
+        Bono bono = modelMapper.map(dto, Bono.class);
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
-
         Bi.modificar(bono);
     }
 
@@ -74,64 +69,54 @@ public class BonoController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/registrar")
     public BonoRespuestaDTO registrarConCalculos(@RequestBody BonoDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Bono bono = m.map(dto, Bono.class);
-
+        Bono bono = modelMapper.map(dto, Bono.class);
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
 
         Bono bonoRegistrado = Bi.registrarConCalculos(bono);
 
-        BonoRespuestaDTO respuesta = new BonoRespuestaDTO();
-        BonoDTO bonoDtoRespuesta = m.map(bonoRegistrado, BonoDTO.class);
-        bonoDtoRespuesta.setIdUsuario(bonoRegistrado.getU().getId());
-        respuesta.setBono(bonoDtoRespuesta);
-
-        if (bonoRegistrado.getFlujos() != null && !bonoRegistrado.getFlujos().isEmpty()) {
-            List<FlujoDTO> flujoDTOs = bonoRegistrado.getFlujos().stream()
-                    .map(f -> m.map(f, FlujoDTO.class))
-                    .collect(Collectors.toList());
-            respuesta.setFlujos(flujoDTOs);
-        }
-
-        if (bonoRegistrado.getResultado() != null) {
-            ResultadoDTO resultadoDTO = m.map(bonoRegistrado.getResultado(), ResultadoDTO.class);
-            respuesta.setResultado(resultadoDTO);
-        }
-
-        return respuesta;
+        return construirRespuesta(bonoRegistrado);
     }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/previsualizar")
     public BonoRespuestaDTO previsualizar(@RequestBody BonoDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Bono bono = m.map(dto, Bono.class);
-
+        Bono bono = modelMapper.map(dto, Bono.class);
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
 
         Bono bonoCalculado = Bi.calcularTemporal(bono);
 
+        return construirRespuesta(bonoCalculado);
+    }
+
+    // ✅ Método extra para construir bien la respuesta completa
+    private BonoRespuestaDTO construirRespuesta(Bono bono) {
         BonoRespuestaDTO respuesta = new BonoRespuestaDTO();
-        BonoDTO bonoDtoRespuesta = m.map(bonoCalculado, BonoDTO.class);
-        bonoDtoRespuesta.setIdUsuario(bonoCalculado.getU().getId());
+
+        BonoDTO bonoDtoRespuesta = modelMapper.map(bono, BonoDTO.class);
+        bonoDtoRespuesta.setIdUsuario(bono.getU().getId());
         respuesta.setBono(bonoDtoRespuesta);
 
-        if (bonoCalculado.getFlujos() != null && !bonoCalculado.getFlujos().isEmpty()) {
-            List<FlujoDTO> flujoDTOs = bonoCalculado.getFlujos().stream()
-                    .map(f -> m.map(f, FlujoDTO.class))
+        if (bono.getFlujos() != null && !bono.getFlujos().isEmpty()) {
+            List<FlujoDTO> flujoDTOs = bono.getFlujos().stream()
+                    .map(f -> modelMapper.map(f, FlujoDTO.class))
                     .collect(Collectors.toList());
             respuesta.setFlujos(flujoDTOs);
+        } else {
+            System.out.println("⚠️ No se encontraron flujos en el bono con ID: " + bono.getIdBono());
         }
 
-        if (bonoCalculado.getResultado() != null) {
-            ResultadoDTO resultadoDTO = m.map(bonoCalculado.getResultado(), ResultadoDTO.class);
+        if (bono.getResultado() != null) {
+            ResultadoDTO resultadoDTO = modelMapper.map(bono.getResultado(), ResultadoDTO.class);
             respuesta.setResultado(resultadoDTO);
+        } else {
+            System.out.println("⚠️ No se encontró resultado para el bono con ID: " + bono.getIdBono());
         }
 
         return respuesta;
     }
-
 }
+

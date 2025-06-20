@@ -20,9 +20,6 @@ public class Bono {
     @Column(name = "moneda", nullable = false, length = 30)
     private String moneda;
 
-    @Column(name = "tipo", nullable = false, length = 100)
-    private String tipo;
-
     @Column(name = "tasainteres", nullable = false)
     private double tasainteres;
 
@@ -34,9 +31,6 @@ public class Bono {
 
     @Column(name = "pgracia", nullable = false, length = 100)
     private String pgracia;
-
-    @Column(name = "capitalizacion", nullable = false, length = 50)
-    private String capitalizacion;
 
     @Column(name = "fechaemision", nullable = false)
     private LocalDate fechaemision;
@@ -55,19 +49,19 @@ public class Bono {
     public Bono() {}
 
     // Constructor completo
-    public Bono(int idBono, String nombre, double montonominal, String moneda, String tipo,
+    public Bono(int idBono, String nombre, double montonominal, String moneda,
                 double tasainteres, String frecuenciapago, int plazomeses, String pgracia,
-                String capitalizacion, LocalDate fechaemision, Usuario u) {
+                 LocalDate fechaemision, Usuario u) {
         this.idBono = idBono;
         this.nombre = nombre;
         this.montonominal = montonominal;
         this.moneda = moneda;
-        this.tipo = tipo;
+
         this.tasainteres = tasainteres;
         this.frecuenciapago = frecuenciapago;
         this.plazomeses = plazomeses;
         this.pgracia = pgracia;
-        this.capitalizacion = capitalizacion;
+
         this.fechaemision = fechaemision;
         this.u = u;
     }
@@ -105,13 +99,7 @@ public class Bono {
         this.moneda = moneda;
     }
 
-    public String getTipo() {
-        return tipo;
-    }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
 
     public double getTasainteres() {
         return tasainteres;
@@ -145,13 +133,7 @@ public class Bono {
         this.pgracia = pgracia;
     }
 
-    public String getCapitalizacion() {
-        return capitalizacion;
-    }
 
-    public void setCapitalizacion(String capitalizacion) {
-        this.capitalizacion = capitalizacion;
-    }
 
     public LocalDate getFechaemision() {
         return fechaemision;

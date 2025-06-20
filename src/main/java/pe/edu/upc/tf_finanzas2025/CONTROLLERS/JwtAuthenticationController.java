@@ -19,20 +19,30 @@ import pe.edu.upc.tf_finanzas2025.SERVICEIMPLEMENTS.JwtUserDetailsService;
 @RestController
 @CrossOrigin
 public class JwtAuthenticationController {
+
     @Autowired
     private AuthenticationManager authenticationManager;
+
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
     @Autowired
     private JwtUserDetailsService userDetailsService;
-
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest req) throws Exception {
         authenticate(req.getUsername(), req.getPassword());
+
+        // Cargamos los datos del usuario
         final UserDetails userDetails = userDetailsService.loadUserByUsername(req.getUsername());
-        final String token = jwtTokenUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(token));
+
+        // ✅ Obtenemos el userId una sola vez
+        int userId = userDetailsService.getUserIdByUsername(req.getUsername());
+
+        // Generamos el token con el ID incluido como claim
+        final String token = jwtTokenUtil.generateToken(userDetails, userId);
+
+        return ResponseEntity.ok(new JwtResponse(token, userId));
     }
 
     private void authenticate(String username, String password) throws Exception {
@@ -44,4 +54,4 @@ public class JwtAuthenticationController {
             throw new Exception("INVALID_CREDENTIALS", e);
         }
     }
-    }
+}

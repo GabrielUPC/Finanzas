@@ -56,8 +56,6 @@ public class BonoImplements implements BonoInterfaces {
         double tasa = bono.getTasainteres() / 100.0;
         int plazoMeses = bono.getPlazomeses();
         String frecuencia = bono.getFrecuenciapago();
-        String tipoTasa = bono.getTipo();
-        String capitalizacion = bono.getCapitalizacion();
         String gracia = bono.getPgracia();
         LocalDate fecha = bono.getFechaemision();
 
@@ -71,13 +69,8 @@ public class BonoImplements implements BonoInterfaces {
         int pagosPorAño = frecuenciaMap.getOrDefault(frecuencia, 12);
         int totalPeriodos = (plazoMeses * pagosPorAño) / 12;
 
-        // Convertir tasa nominal a efectiva si aplica
-        if (tipoTasa.equalsIgnoreCase("Nominal")) {
-            int n = frecuenciaMap.getOrDefault(capitalizacion, pagosPorAño);
-            tasa = Math.pow(1 + (tasa / n), n * 1.0 / pagosPorAño) - 1;
-        } else {
-            tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
-        }
+        // Aplicar directamente tasa efectiva periódica
+        tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
 
         bonoRepository.save(bono);
 
@@ -138,18 +131,14 @@ public class BonoImplements implements BonoInterfaces {
         bonoFinal.setFlujos(flujoRepository.findByBoIdBono(bono.getIdBono()));
         bonoFinal.setResultado(resultadoRepository.findByBoIdBono(bono.getIdBono()));
         return bonoFinal;
-
-
     }
+
     @Override
     public Bono calcularTemporal(Bono bono) {
-        // Copia exacta del método registrarConCalculos, pero sin guardar en base de datos
         double montoNominal = bono.getMontonominal();
         double tasa = bono.getTasainteres() / 100.0;
         int plazoMeses = bono.getPlazomeses();
         String frecuencia = bono.getFrecuenciapago();
-        String tipoTasa = bono.getTipo();
-        String capitalizacion = bono.getCapitalizacion();
         String gracia = bono.getPgracia();
         LocalDate fecha = bono.getFechaemision();
 
@@ -163,12 +152,7 @@ public class BonoImplements implements BonoInterfaces {
         int pagosPorAño = frecuenciaMap.getOrDefault(frecuencia, 12);
         int totalPeriodos = (plazoMeses * pagosPorAño) / 12;
 
-        if (tipoTasa.equalsIgnoreCase("Nominal")) {
-            int n = frecuenciaMap.getOrDefault(capitalizacion, pagosPorAño);
-            tasa = Math.pow(1 + (tasa / n), n * 1.0 / pagosPorAño) - 1;
-        } else {
-            tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
-        }
+        tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
 
         List<Flujo> flujos = new ArrayList<>();
         double saldo = montoNominal;
@@ -225,5 +209,4 @@ public class BonoImplements implements BonoInterfaces {
         bono.setResultado(resultado);
         return bono;
     }
-
 }

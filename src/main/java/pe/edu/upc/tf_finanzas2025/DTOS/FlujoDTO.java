@@ -12,7 +12,6 @@ public class FlujoDTO {
     private double amortizacion;
     private double cuotatotal;
     private double saldo;
-    private Bono bo;
 
     public int getIdFlujo() {
         return idFlujo;
@@ -70,11 +69,5 @@ public class FlujoDTO {
         this.saldo = saldo;
     }
 
-    public Bono getBo() {
-        return bo;
-    }
 
-    public void setBo(Bono bo) {
-        this.bo = bo;
-    }
 }

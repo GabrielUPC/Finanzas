@@ -1,6 +1,5 @@
 package pe.edu.upc.tf_finanzas2025.DTOS;
 
-import pe.edu.upc.tf_finanzas2025.ENTITIES.Usuario;
 
 import java.time.LocalDate;
 
@@ -9,12 +8,10 @@ public class BonoDTO {
     private String nombre;
     private double montonominal;
     private String moneda;
-    private String tipo;
     private double tasainteres;
     private String frecuenciapago;
     private int plazomeses;
     private String pgracia;
-    private String capitalizacion;
     private LocalDate fechaemision;
     private int idUsuario;
 
@@ -50,13 +47,7 @@ public class BonoDTO {
         this.moneda = moneda;
     }
 
-    public String getTipo() {
-        return tipo;
-    }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
 
     public double getTasainteres() {
         return tasainteres;
@@ -90,13 +81,7 @@ public class BonoDTO {
         this.pgracia = pgracia;
     }
 
-    public String getCapitalizacion() {
-        return capitalizacion;
-    }
 
-    public void setCapitalizacion(String capitalizacion) {
-        this.capitalizacion = capitalizacion;
-    }
 
     public LocalDate getFechaemision() {
         return fechaemision;

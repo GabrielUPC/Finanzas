@@ -10,7 +10,7 @@ public class ResultadoDTO {
     private double duracion_modificada;
     private double convexidad;
     private double precio_maximo;
-    private Bono bo;
+
 
     public int getIdResultado() {
         return idResultado;
@@ -66,13 +66,5 @@ public class ResultadoDTO {
 
     public void setPrecio_maximo(double precio_maximo) {
         this.precio_maximo = precio_maximo;
-    }
-
-    public Bono getBo() {
-        return bo;
-    }
-
-    public void setBo(Bono bo) {
-        this.bo = bo;
     }
 }
