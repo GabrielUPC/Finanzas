@@ -17,11 +17,11 @@ import java.util.Map;
 
 @Service
 public class BonoImplements implements BonoInterfaces {
+
     @Autowired
     private IBonoRepository bonoRepository;
     @Autowired
     private IFlujoRepository flujoRepository;
-
     @Autowired
     private IResultadoRepository resultadoRepository;
 
@@ -52,161 +52,143 @@ public class BonoImplements implements BonoInterfaces {
 
     @Override
     public Bono registrarConCalculos(Bono bono) {
-        double montoNominal = bono.getMontonominal();
-        double tasa = bono.getTasainteres() / 100.0;
-        int plazoMeses = bono.getPlazomeses();
-        String frecuencia = bono.getFrecuenciapago();
-        String gracia = bono.getPgracia();
-        LocalDate fecha = bono.getFechaemision();
-
-        Map<String, Integer> frecuenciaMap = Map.of(
-                "Mensual", 12,
-                "Bimestral", 6,
-                "Trimestral", 4,
-                "Semestral", 2,
-                "Anual", 1
-        );
-        int pagosPorAño = frecuenciaMap.getOrDefault(frecuencia, 12);
-        int totalPeriodos = (plazoMeses * pagosPorAño) / 12;
-
-        // Aplicar directamente tasa efectiva periódica
-        tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
-
-        bonoRepository.save(bono);
-
-        List<Flujo> flujos = new ArrayList<>();
-        double saldo = montoNominal;
-        double interesPago = montoNominal * tasa;
-        int graciaPeriodos = 1;
-
-        double vpn = 0.0;
-        double duracion = 0.0;
-        double convexidad = 0.0;
-        double tasaDescuento = tasa;
-
-        for (int i = 1; i <= totalPeriodos; i++) {
-            double interes = 0.0;
-            double amort = 0.0;
-
-            if (gracia.equalsIgnoreCase("Total") && i <= graciaPeriodos) {
-                interes = 0;
-                amort = 0;
-            } else if (gracia.equalsIgnoreCase("Parcial") && i <= graciaPeriodos) {
-                interes = interesPago;
-                amort = 0;
-            } else {
-                interes = interesPago;
-                amort = (i == totalPeriodos) ? montoNominal : 0;
-            }
-
-            double cuota = interes + amort;
-            saldo = (i == totalPeriodos) ? 0 : montoNominal;
-
-            LocalDate fechaPago = fecha.plusMonths((long) (12.0 / pagosPorAño) * i);
-            Flujo flujo = new Flujo(0, i, fechaPago, interes, amort, cuota, saldo, bono);
-            flujos.add(flujo);
-            flujoRepository.save(flujo);
-
-            double flujoDesc = cuota / Math.pow(1 + tasaDescuento, i);
-            vpn += flujoDesc;
-            duracion += i * flujoDesc;
-            convexidad += i * (i + 1) * flujoDesc;
-        }
-
-        duracion = duracion / vpn;
-        double duracionMod = duracion / (1 + tasaDescuento);
-        convexidad = convexidad / (vpn * Math.pow(1 + tasaDescuento, 2));
-
-        Resultado resultado = new Resultado();
-        resultado.setTcea(tasaDescuento * pagosPorAño);
-        resultado.setTrea(tasaDescuento * pagosPorAño);
-        resultado.setDuracion(duracion);
-        resultado.setDuracion_modificada(duracionMod);
-        resultado.setConvexidad(convexidad);
-        resultado.setPrecio_maximo(vpn);
-        resultado.setBo(bono);
-        resultadoRepository.save(resultado);
-
-        Bono bonoFinal = bonoRepository.findById(bono.getIdBono()).orElse(bono);
-        bonoFinal.setFlujos(flujoRepository.findByBoIdBono(bono.getIdBono()));
-        bonoFinal.setResultado(resultadoRepository.findByBoIdBono(bono.getIdBono()));
-        return bonoFinal;
+        return calcularConLogica(bono, true);
     }
 
     @Override
     public Bono calcularTemporal(Bono bono) {
+        return calcularConLogica(bono, false);
+    }
+
+    private Bono calcularConLogica(Bono bono, boolean persistir) {
         double montoNominal = bono.getMontonominal();
         double tasa = bono.getTasainteres() / 100.0;
         int plazoMeses = bono.getPlazomeses();
         String frecuencia = bono.getFrecuenciapago();
-        String gracia = bono.getPgracia();
         LocalDate fecha = bono.getFechaemision();
+        Map<Integer, String> mapaGracia = bono.getMapaGraciaPorPeriodo();
 
         Map<String, Integer> frecuenciaMap = Map.of(
-                "Mensual", 12,
-                "Bimestral", 6,
-                "Trimestral", 4,
                 "Semestral", 2,
                 "Anual", 1
         );
-        int pagosPorAño = frecuenciaMap.getOrDefault(frecuencia, 12);
+        int pagosPorAño = frecuenciaMap.getOrDefault(frecuencia, 2);
         int totalPeriodos = (plazoMeses * pagosPorAño) / 12;
 
         tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
 
+        if (persistir) bonoRepository.save(bono);
+
         List<Flujo> flujos = new ArrayList<>();
         double saldo = montoNominal;
-        double interesPago = montoNominal * tasa;
-        int graciaPeriodos = 1;
 
         double vpn = 0.0;
         double duracion = 0.0;
         double convexidad = 0.0;
         double tasaDescuento = tasa;
 
+        List<Double> flujoEmisor = new ArrayList<>();
+        List<Double> flujoInversionista = new ArrayList<>();
+
+        // --- COSTOS EMISOR ---
+        double porcentajeEstructuracion = 0.008;
+        double porcentajeColocacion = 0.0015;
+        double porcentajeCavali = 0.001;
+        double costosTotalesEmisor = montoNominal * (porcentajeEstructuracion + porcentajeColocacion + porcentajeCavali);
+        double montoRecibido = montoNominal - costosTotalesEmisor;
+
+        // --- COSTOS INVERSIONISTA ---
+        double porcentajeSAB = 0.0025;
+        double porcentajeCustodia = 0.0005;
+        double costosTotalesInversionista = montoNominal * (porcentajeSAB + porcentajeCustodia);
+        double montoPagado = montoNominal + costosTotalesInversionista;
+
+        flujoEmisor.add(montoRecibido);
+        flujoInversionista.add(-montoPagado);
+
         for (int i = 1; i <= totalPeriodos; i++) {
             double interes = 0.0;
             double amort = 0.0;
+            String tipoGracia = mapaGracia != null ? mapaGracia.getOrDefault(i, "Ninguna") : "Ninguna";
 
-            if (gracia.equalsIgnoreCase("Total") && i <= graciaPeriodos) {
-                interes = 0;
-                amort = 0;
-            } else if (gracia.equalsIgnoreCase("Parcial") && i <= graciaPeriodos) {
-                interes = interesPago;
-                amort = 0;
-            } else {
-                interes = interesPago;
-                amort = (i == totalPeriodos) ? montoNominal : 0;
+            switch (tipoGracia.toLowerCase()) {
+                case "total":
+                    interes = 0;
+                    amort = 0;
+                    saldo += saldo * tasa;
+                    break;
+                default:
+                    interes = saldo * tasa;
+                    amort = (i == totalPeriodos) ? saldo : 0;
+                    break;
             }
 
             double cuota = interes + amort;
-            saldo = (i == totalPeriodos) ? 0 : montoNominal;
+            saldo = (i == totalPeriodos) ? 0 : saldo;
 
             LocalDate fechaPago = fecha.plusMonths((long) (12.0 / pagosPorAño) * i);
             Flujo flujo = new Flujo(0, i, fechaPago, interes, amort, cuota, saldo, bono);
             flujos.add(flujo);
+            if (persistir) flujoRepository.save(flujo);
 
             double flujoDesc = cuota / Math.pow(1 + tasaDescuento, i);
             vpn += flujoDesc;
             duracion += i * flujoDesc;
             convexidad += i * (i + 1) * flujoDesc;
+
+            flujoEmisor.add(-cuota);
+            flujoInversionista.add(cuota);
         }
 
         duracion = duracion / vpn;
         double duracionMod = duracion / (1 + tasaDescuento);
         convexidad = convexidad / (vpn * Math.pow(1 + tasaDescuento, 2));
 
+        double tirEmisor = calcularTIR(flujoEmisor);
+        double tirInversionista = calcularTIR(flujoInversionista);
+
+        double tcea = Math.pow(1 + tirEmisor, pagosPorAño) - 1;
+        double trea = Math.pow(1 + tirInversionista, pagosPorAño) - 1;
+
         Resultado resultado = new Resultado();
-        resultado.setTcea(tasaDescuento * pagosPorAño);
-        resultado.setTrea(tasaDescuento * pagosPorAño);
+        resultado.setTcea(tcea);
+        resultado.setTrea(trea);
         resultado.setDuracion(duracion);
         resultado.setDuracion_modificada(duracionMod);
         resultado.setConvexidad(convexidad);
         resultado.setPrecio_maximo(vpn);
         resultado.setBo(bono);
+        if (persistir) resultadoRepository.save(resultado);
 
-        bono.setFlujos(flujos);
-        bono.setResultado(resultado);
-        return bono;
+        if (persistir) {
+            Bono bonoFinal = bonoRepository.findById(bono.getIdBono()).orElse(bono);
+            bonoFinal.setFlujos(flujoRepository.findByBoIdBono(bono.getIdBono()));
+            bonoFinal.setResultado(resultadoRepository.findByBoIdBono(bono.getIdBono()));
+            return bonoFinal;
+        } else {
+            bono.setFlujos(flujos);
+            bono.setResultado(resultado);
+            return bono;
+        }
     }
+    private double calcularTIR(List<Double> flujos) {
+        double tir = 0.1;
+        double epsilon = 1e-7;
+        int maxIter = 1000;
+
+        for (int iter = 0; iter < maxIter; iter++) {
+            double f = 0;
+            double df = 0;
+            for (int i = 0; i < flujos.size(); i++) {
+                f += flujos.get(i) / Math.pow(1 + tir, i);
+                if (i > 0)
+                    df += -i * flujos.get(i) / Math.pow(1 + tir, i + 1);
+            }
+            double newTir = tir - f / df;
+            if (Math.abs(newTir - tir) < epsilon) return newTir;
+            tir = newTir;
+        }
+        return tir;
+    }
+
 }

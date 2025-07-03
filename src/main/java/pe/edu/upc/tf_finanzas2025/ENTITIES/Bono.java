@@ -3,6 +3,7 @@ package pe.edu.upc.tf_finanzas2025.ENTITIES;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "Bono")
@@ -29,11 +30,12 @@ public class Bono {
     @Column(name = "plazomeses", nullable = false)
     private int plazomeses;
 
-    @Column(name = "pgracia", nullable = false, length = 100)
-    private String pgracia;
 
     @Column(name = "fechaemision", nullable = false)
     private LocalDate fechaemision;
+
+    @ElementCollection
+    private Map<Integer, String> mapaGraciaPorPeriodo;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idUsuario")
@@ -50,17 +52,15 @@ public class Bono {
 
     // Constructor completo
     public Bono(int idBono, String nombre, double montonominal, String moneda,
-                double tasainteres, String frecuenciapago, int plazomeses, String pgracia,
-                 LocalDate fechaemision, Usuario u) {
+                double tasainteres, String frecuenciapago, int plazomeses,
+                LocalDate fechaemision, Usuario u) {
         this.idBono = idBono;
         this.nombre = nombre;
         this.montonominal = montonominal;
         this.moneda = moneda;
-
         this.tasainteres = tasainteres;
         this.frecuenciapago = frecuenciapago;
         this.plazomeses = plazomeses;
-        this.pgracia = pgracia;
 
         this.fechaemision = fechaemision;
         this.u = u;
@@ -99,8 +99,6 @@ public class Bono {
         this.moneda = moneda;
     }
 
-
-
     public double getTasainteres() {
         return tasainteres;
     }
@@ -123,14 +121,6 @@ public class Bono {
 
     public void setPlazomeses(int plazomeses) {
         this.plazomeses = plazomeses;
-    }
-
-    public String getPgracia() {
-        return pgracia;
-    }
-
-    public void setPgracia(String pgracia) {
-        this.pgracia = pgracia;
     }
 
 
@@ -165,5 +155,13 @@ public class Bono {
 
     public void setResultado(Resultado resultado) {
         this.resultado = resultado;
+    }
+
+    public Map<Integer, String> getMapaGraciaPorPeriodo() {
+        return mapaGraciaPorPeriodo;
+    }
+
+    public void setMapaGraciaPorPeriodo(Map<Integer, String> mapaGraciaPorPeriodo) {
+        this.mapaGraciaPorPeriodo = mapaGraciaPorPeriodo;
     }
 }

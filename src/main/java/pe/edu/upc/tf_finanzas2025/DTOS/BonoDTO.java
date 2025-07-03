@@ -1,7 +1,7 @@
 package pe.edu.upc.tf_finanzas2025.DTOS;
 
-
 import java.time.LocalDate;
+import java.util.Map;
 
 public class BonoDTO {
     private int idBono;
@@ -11,9 +11,10 @@ public class BonoDTO {
     private double tasainteres;
     private String frecuenciapago;
     private int plazomeses;
-    private String pgracia;
+
     private LocalDate fechaemision;
     private int idUsuario;
+    private Map<Integer, String> mapaGraciaPorPeriodo;
 
     public int getIdBono() {
         return idBono;
@@ -47,8 +48,6 @@ public class BonoDTO {
         this.moneda = moneda;
     }
 
-
-
     public double getTasainteres() {
         return tasainteres;
     }
@@ -73,14 +72,6 @@ public class BonoDTO {
         this.plazomeses = plazomeses;
     }
 
-    public String getPgracia() {
-        return pgracia;
-    }
-
-    public void setPgracia(String pgracia) {
-        this.pgracia = pgracia;
-    }
-
 
 
     public LocalDate getFechaemision() {
@@ -97,5 +88,13 @@ public class BonoDTO {
 
     public void setIdUsuario(int idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public Map<Integer, String> getMapaGraciaPorPeriodo() {
+        return mapaGraciaPorPeriodo;
+    }
+
+    public void setMapaGraciaPorPeriodo(Map<Integer, String> mapaGraciaPorPeriodo) {
+        this.mapaGraciaPorPeriodo = mapaGraciaPorPeriodo;
     }
 }

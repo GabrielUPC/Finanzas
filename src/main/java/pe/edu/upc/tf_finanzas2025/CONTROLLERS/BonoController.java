@@ -26,7 +26,7 @@ public class BonoController {
     @Autowired
     private IUsuarioRepository usuarioRepository;
 
-    private final ModelMapper modelMapper = new ModelMapper(); // Único mapeador
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
@@ -36,6 +36,7 @@ public class BonoController {
             if (x.getU() != null) {
                 dto.setIdUsuario(x.getU().getId());
             }
+            dto.setMapaGraciaPorPeriodo(x.getMapaGraciaPorPeriodo());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -44,6 +45,7 @@ public class BonoController {
     @PostMapping
     public void add(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
+        bono.setMapaGraciaPorPeriodo(dto.getMapaGraciaPorPeriodo());
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
@@ -54,6 +56,7 @@ public class BonoController {
     @PutMapping
     public void modificar(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
+        bono.setMapaGraciaPorPeriodo(dto.getMapaGraciaPorPeriodo());
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
@@ -70,6 +73,7 @@ public class BonoController {
     @PostMapping("/registrar")
     public BonoRespuestaDTO registrarConCalculos(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
+        bono.setMapaGraciaPorPeriodo(dto.getMapaGraciaPorPeriodo());
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
@@ -83,6 +87,7 @@ public class BonoController {
     @PostMapping("/previsualizar")
     public BonoRespuestaDTO previsualizar(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
+        bono.setMapaGraciaPorPeriodo(dto.getMapaGraciaPorPeriodo());
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
         bono.setU(usuario);
@@ -92,12 +97,12 @@ public class BonoController {
         return construirRespuesta(bonoCalculado);
     }
 
-    // ✅ Método extra para construir bien la respuesta completa
     private BonoRespuestaDTO construirRespuesta(Bono bono) {
         BonoRespuestaDTO respuesta = new BonoRespuestaDTO();
 
         BonoDTO bonoDtoRespuesta = modelMapper.map(bono, BonoDTO.class);
         bonoDtoRespuesta.setIdUsuario(bono.getU().getId());
+        bonoDtoRespuesta.setMapaGraciaPorPeriodo(bono.getMapaGraciaPorPeriodo());
         respuesta.setBono(bonoDtoRespuesta);
 
         if (bono.getFlujos() != null && !bono.getFlujos().isEmpty()) {
@@ -119,4 +124,3 @@ public class BonoController {
         return respuesta;
     }
 }
-
