@@ -10,6 +10,8 @@ public class ResultadoDTO {
     private double duracion_modificada;
     private double convexidad;
     private double precio_maximo;
+    private double precio_mercado ;
+
 
 
     public int getIdResultado() {
@@ -66,5 +68,12 @@ public class ResultadoDTO {
 
     public void setPrecio_maximo(double precio_maximo) {
         this.precio_maximo = precio_maximo;
+    }
+    public double getPrecio_mercado() {
+        return precio_mercado;
+    }
+
+    public void setPrecio_mercado(double precio_mercado) {
+        this.precio_mercado = precio_mercado;
     }
 }

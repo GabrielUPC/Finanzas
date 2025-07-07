@@ -62,30 +62,30 @@ public class BonoImplements implements BonoInterfaces {
 
     private Bono calcularConLogica(Bono bono, boolean persistir) {
         double montoNominal = bono.getMontonominal();
-        double tasa = bono.getTasainteres() / 100.0;
+        double tasa = bono.getTasainteres() / 100.0; // TEA bono
+        double cok = bono.getTasaCOK() / 100.0;       // TEA COK (mercado)
         int plazoMeses = bono.getPlazomeses();
         String frecuencia = bono.getFrecuenciapago();
         LocalDate fecha = bono.getFechaemision();
         Map<Integer, String> mapaGracia = bono.getMapaGraciaPorPeriodo();
 
-        Map<String, Integer> frecuenciaMap = Map.of(
-                "Semestral", 2,
-                "Anual", 1
-        );
+        Map<String, Integer> frecuenciaMap = Map.of("Semestral", 2, "Anual", 1);
         int pagosPorAño = frecuenciaMap.getOrDefault(frecuencia, 2);
         int totalPeriodos = (plazoMeses * pagosPorAño) / 12;
 
-        tasa = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
+        // Convertir tasas TEA → TES
+        double tasaBono = Math.pow(1 + tasa, 1.0 / pagosPorAño) - 1;
+        double tasaDescuento = Math.pow(1 + cok, 1.0 / pagosPorAño) - 1;
 
         if (persistir) bonoRepository.save(bono);
 
         List<Flujo> flujos = new ArrayList<>();
         double saldo = montoNominal;
 
-        double vpn = 0.0;
+        double precioMercado = 0.0;
+        double precioMaximo = 0.0;
         double duracion = 0.0;
         double convexidad = 0.0;
-        double tasaDescuento = tasa;
 
         List<Double> flujoEmisor = new ArrayList<>();
         List<Double> flujoInversionista = new ArrayList<>();
@@ -115,10 +115,10 @@ public class BonoImplements implements BonoInterfaces {
                 case "total":
                     interes = 0;
                     amort = 0;
-                    saldo += saldo * tasa;
+                    saldo += saldo * tasaBono;
                     break;
                 default:
-                    interes = saldo * tasa;
+                    interes = saldo * tasaBono;
                     amort = (i == totalPeriodos) ? saldo : 0;
                     break;
             }
@@ -131,18 +131,22 @@ public class BonoImplements implements BonoInterfaces {
             flujos.add(flujo);
             if (persistir) flujoRepository.save(flujo);
 
+            // Descuento con COK → precio de mercado
             double flujoDesc = cuota / Math.pow(1 + tasaDescuento, i);
-            vpn += flujoDesc;
+            precioMercado += flujoDesc;
             duracion += i * flujoDesc;
             convexidad += i * (i + 1) * flujoDesc;
+
+            // Suma sin descuento → precio máximo teórico
+            precioMaximo += cuota;
 
             flujoEmisor.add(-cuota);
             flujoInversionista.add(cuota);
         }
 
-        duracion = duracion / vpn;
+        duracion = duracion / precioMercado;
         double duracionMod = duracion / (1 + tasaDescuento);
-        convexidad = convexidad / (vpn * Math.pow(1 + tasaDescuento, 2));
+        convexidad = convexidad / (precioMercado * Math.pow(1 + tasaDescuento, 2));
 
         double tirEmisor = calcularTIR(flujoEmisor);
         double tirInversionista = calcularTIR(flujoInversionista);
@@ -156,7 +160,8 @@ public class BonoImplements implements BonoInterfaces {
         resultado.setDuracion(duracion);
         resultado.setDuracion_modificada(duracionMod);
         resultado.setConvexidad(convexidad);
-        resultado.setPrecio_maximo(vpn);
+        resultado.setPrecio_maximo(precioMaximo);    // COK = 0%
+        resultado.setPrecio_mercado(precioMercado);  // COK real
         resultado.setBo(bono);
         if (persistir) resultadoRepository.save(resultado);
 

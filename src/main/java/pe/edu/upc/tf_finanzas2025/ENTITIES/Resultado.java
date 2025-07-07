@@ -20,6 +20,8 @@ public class Resultado {
     private double convexidad;
     @Column(name="precio_maximo",nullable=false)
     private double precio_maximo;
+    @Column(name="precio_mercado ",nullable=false)
+    private double precio_mercado ;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idBono")
     private Bono bo;
@@ -27,7 +29,7 @@ public class Resultado {
     public Resultado() {
     }
 
-    public Resultado(int idResultado, double tcea, double trea, double duracion, double duracion_modificada, double convexidad, double precio_maximo, Bono bo) {
+    public Resultado(int idResultado, double tcea, double trea, double duracion, double duracion_modificada, double convexidad, double precio_maximo, double precio_mercado, Bono bo) {
         this.idResultado = idResultado;
         this.tcea = tcea;
         this.trea = trea;
@@ -35,6 +37,7 @@ public class Resultado {
         this.duracion_modificada = duracion_modificada;
         this.convexidad = convexidad;
         this.precio_maximo = precio_maximo;
+        this.precio_mercado = precio_mercado;
         this.bo = bo;
     }
 
@@ -92,6 +95,14 @@ public class Resultado {
 
     public void setPrecio_maximo(double precio_maximo) {
         this.precio_maximo = precio_maximo;
+    }
+
+    public double getPrecio_mercado() {
+        return precio_mercado;
+    }
+
+    public void setPrecio_mercado(double precio_mercado) {
+        this.precio_mercado = precio_mercado;
     }
 
     public Bono getBo() {

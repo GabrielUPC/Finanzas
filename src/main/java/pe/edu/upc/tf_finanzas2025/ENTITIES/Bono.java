@@ -30,9 +30,10 @@ public class Bono {
     @Column(name = "plazomeses", nullable = false)
     private int plazomeses;
 
-
     @Column(name = "fechaemision", nullable = false)
     private LocalDate fechaemision;
+    @Column(name = "tasaCOK", nullable = false)
+    private double tasaCOK;
 
     @ElementCollection
     private Map<Integer, String> mapaGraciaPorPeriodo;
@@ -50,10 +51,8 @@ public class Bono {
     // Constructor vacío
     public Bono() {}
 
-    // Constructor completo
-    public Bono(int idBono, String nombre, double montonominal, String moneda,
-                double tasainteres, String frecuenciapago, int plazomeses,
-                LocalDate fechaemision, Usuario u) {
+
+    public Bono(int idBono, String nombre, double montonominal, String moneda, double tasainteres, String frecuenciapago, int plazomeses, double tasaCOK, LocalDate fechaemision, Map<Integer, String> mapaGraciaPorPeriodo, Usuario u, List<Flujo> flujos, Resultado resultado) {
         this.idBono = idBono;
         this.nombre = nombre;
         this.montonominal = montonominal;
@@ -61,12 +60,14 @@ public class Bono {
         this.tasainteres = tasainteres;
         this.frecuenciapago = frecuenciapago;
         this.plazomeses = plazomeses;
-
+        this.tasaCOK = tasaCOK;
         this.fechaemision = fechaemision;
+        this.mapaGraciaPorPeriodo = mapaGraciaPorPeriodo;
         this.u = u;
+        this.flujos = flujos;
+        this.resultado = resultado;
     }
 
-    // Getters y setters
     public int getIdBono() {
         return idBono;
     }
@@ -123,7 +124,13 @@ public class Bono {
         this.plazomeses = plazomeses;
     }
 
+    public double getTasaCOK() {
+        return tasaCOK;
+    }
 
+    public void setTasaCOK(double tasaCOK) {
+        this.tasaCOK = tasaCOK;
+    }
 
     public LocalDate getFechaemision() {
         return fechaemision;
@@ -131,6 +138,14 @@ public class Bono {
 
     public void setFechaemision(LocalDate fechaemision) {
         this.fechaemision = fechaemision;
+    }
+
+    public Map<Integer, String> getMapaGraciaPorPeriodo() {
+        return mapaGraciaPorPeriodo;
+    }
+
+    public void setMapaGraciaPorPeriodo(Map<Integer, String> mapaGraciaPorPeriodo) {
+        this.mapaGraciaPorPeriodo = mapaGraciaPorPeriodo;
     }
 
     public Usuario getU() {
@@ -155,13 +170,5 @@ public class Bono {
 
     public void setResultado(Resultado resultado) {
         this.resultado = resultado;
-    }
-
-    public Map<Integer, String> getMapaGraciaPorPeriodo() {
-        return mapaGraciaPorPeriodo;
-    }
-
-    public void setMapaGraciaPorPeriodo(Map<Integer, String> mapaGraciaPorPeriodo) {
-        this.mapaGraciaPorPeriodo = mapaGraciaPorPeriodo;
     }
 }

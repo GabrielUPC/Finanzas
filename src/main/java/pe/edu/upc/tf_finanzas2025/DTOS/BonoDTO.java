@@ -1,5 +1,7 @@
 package pe.edu.upc.tf_finanzas2025.DTOS;
 
+import jakarta.persistence.Column;
+
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -11,8 +13,8 @@ public class BonoDTO {
     private double tasainteres;
     private String frecuenciapago;
     private int plazomeses;
-
     private LocalDate fechaemision;
+    private double tasaCOK;
     private int idUsuario;
     private Map<Integer, String> mapaGraciaPorPeriodo;
 
@@ -72,14 +74,20 @@ public class BonoDTO {
         this.plazomeses = plazomeses;
     }
 
-
-
     public LocalDate getFechaemision() {
         return fechaemision;
     }
 
     public void setFechaemision(LocalDate fechaemision) {
         this.fechaemision = fechaemision;
+    }
+
+    public double getTasaCOK() {
+        return tasaCOK;
+    }
+
+    public void setTasaCOK(double tasaCOK) {
+        this.tasaCOK = tasaCOK;
     }
 
     public int getIdUsuario() {
