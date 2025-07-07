@@ -28,7 +28,7 @@ public class BonoController {
 
     private final ModelMapper modelMapper = new ModelMapper();
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @GetMapping
     public List<BonoDTO> listar() {
         return Bi.list().stream().map(x -> {
@@ -41,7 +41,7 @@ public class BonoController {
         }).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PostMapping
     public void add(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
@@ -52,7 +52,7 @@ public class BonoController {
         Bi.add(bono);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PutMapping
     public void modificar(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
@@ -63,13 +63,13 @@ public class BonoController {
         Bi.modificar(bono);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") Integer id) {
         Bi.eliminar(id);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PostMapping("/registrar")
     public BonoRespuestaDTO registrarConCalculos(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);
@@ -83,7 +83,7 @@ public class BonoController {
         return construirRespuesta(bonoRegistrado);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PostMapping("/previsualizar")
     public BonoRespuestaDTO previsualizar(@RequestBody BonoDTO dto) {
         Bono bono = modelMapper.map(dto, Bono.class);

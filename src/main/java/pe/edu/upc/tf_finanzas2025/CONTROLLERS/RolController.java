@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/roles")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
 public class RolController {
     @Autowired
     private RolInterfaces ri;

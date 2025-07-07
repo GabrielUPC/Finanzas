@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class FlujoController {
     @Autowired
     private FlujoInterfaces Fi;
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @GetMapping
     public List<FlujoDTO> listar(){
         return Fi.list().stream().map(x->{
@@ -24,21 +24,21 @@ public class FlujoController {
             return m.map(x, FlujoDTO.class);
         }).collect(Collectors.toList());
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PostMapping
     public void add(@RequestBody FlujoDTO dto){
         ModelMapper m=new ModelMapper();
         Flujo r=m.map(dto, Flujo.class);
         Fi.add(r);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PutMapping
     public void modificar(@RequestBody FlujoDTO dto){
         ModelMapper m=new ModelMapper();
         Flujo f=m.map(dto, Flujo.class);
         Fi.modificar(f);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") Integer id){
         Fi.eliminar(id);
