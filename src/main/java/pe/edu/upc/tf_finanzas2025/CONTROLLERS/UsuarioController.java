@@ -20,7 +20,7 @@ public class UsuarioController {
     private UsuarioInterfaces uService;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @GetMapping
     public List<UsuarioListDTO> listar(){
         return uService.list().stream().map(x->{
@@ -28,7 +28,7 @@ public class UsuarioController {
             return m.map(x,UsuarioListDTO.class);
         }).collect(Collectors.toList());
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PostMapping
     public void add(@RequestBody UsuarioDTO dto){
         ModelMapper m = new ModelMapper();
@@ -37,14 +37,14 @@ public class UsuarioController {
         u.setPassword(encodedPassword);
         uService.add(u);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PutMapping
     public void modificar(@RequestBody UsuarioDTO dto){
         ModelMapper m=new ModelMapper();
         Usuario u=m.map(dto, Usuario.class);
         uService.modificar(u);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") Integer id){
         uService.eliminar(id);

@@ -1,7 +1,9 @@
 package pe.edu.upc.tf_finanzas2025.SERVICEIMPLEMENTS;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pe.edu.upc.tf_finanzas2025.ENTITIES.Rol;
 import pe.edu.upc.tf_finanzas2025.ENTITIES.Usuario;
 import pe.edu.upc.tf_finanzas2025.REPOSITORIES.IUsuarioRepository;
 import pe.edu.upc.tf_finanzas2025.SERVICEINTERFACES.UsuarioInterfaces;
@@ -42,5 +44,24 @@ public class UsuarioImplements implements UsuarioInterfaces {
         Usuario usuario = usuarioRepository.findOneByUsername(username);
         return usuario != null ? usuario.getId() : -1;
     }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public Usuario registrarUsuarioConRol(String username, String password, String rol) {
+        Usuario usuario = new Usuario();
+        usuario.setUsername(username);
+        usuario.setPassword(passwordEncoder.encode(password));
+        usuario.setEnabled(true);
+
+        Rol nuevoRol = new Rol();
+        nuevoRol.setRol(rol); // CLIENTE o EMISOR
+        nuevoRol.setUsuario(usuario);
+
+        usuario.setRoles(List.of(nuevoRol));
+
+        return usuarioRepository.save(usuario);
+    }
+
 
 }

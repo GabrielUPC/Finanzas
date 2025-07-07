@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class ResultadoController {
     @Autowired
     private ResultadoInterfaces Ri;
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @GetMapping
     public List<ResultadoDTO> listar(){
         return Ri.list().stream().map(x->{
@@ -24,21 +24,21 @@ public class ResultadoController {
             return m.map(x, ResultadoDTO.class);
         }).collect(Collectors.toList());
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PostMapping
     public void add(@RequestBody ResultadoDTO dto){
         ModelMapper m=new ModelMapper();
         Resultado r=m.map(dto, Resultado.class);
         Ri.add(r);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @PutMapping
     public void modificar(@RequestBody ResultadoDTO dto){
         ModelMapper m=new ModelMapper();
         Resultado r=m.map(dto, Resultado.class);
         Ri.modificar(r);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('CLIENTE') or hasAuthority('ADMIN')")
     @DeleteMapping("{id}")
     public void delete(@PathVariable("id") Integer id){
         Ri.eliminar(id);

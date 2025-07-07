@@ -11,4 +11,6 @@ public interface UsuarioInterfaces {
     public void modificar(Usuario usuario);
     public void eliminar(int id);
     public int getUserIdFromUsername(String username);
+    Usuario registrarUsuarioConRol(String username, String password, String rol);
+    ;
 }
